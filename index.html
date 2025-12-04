@@ -283,7 +283,7 @@ function prevImg(prefix, total) {
   let img = document.getElementById(prefix + "-img");
   let current = parseInt(img.src.match(/(\d+)\.jpg/)[1]);
   let prev = current === 1 ? total : current - 1;
-  img.src = `${prefix}${prev}.jpg`;
+  img.src = `imagenes${prefix}${prev}.jpg`;
 }
 
 
