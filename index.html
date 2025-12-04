@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Descubriendo la memoria del patrimonio invisible de Villa de Leyva</title>
+
+  <!-- Fuentes y Leaflet -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <style>
+    :root{
+      --bg: #FBF8F6;
+      --card: #FFFFFF;
+      --muted: #6B6B6B;
+      --accent: #A8DADC; /* pastel mint */
+      --accent-2:#FFD6A5; /* pastel peach */
+      --accent-3:#F5C6E7; /* pastel pink */
+      --text: #1F2933;
+      --radius: 14px;
+      --shadow: 0 8px 30px rgba(31,41,51,0.08);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: 'Poppins', sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+    }
+
+    /* Skip link for accessibility */
+    .skip-link{position:absolute;left:-999px;top:auto;width:1px;height:1px;overflow:hidden}
+    .skip-link:focus{left:10px;top:10px;width:auto;height:auto;padding:8px;background:#000;color:#fff;border-radius:6px}
+
+    header{
+      background:linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.9));
+      padding:18px 28px;
+      display:flex;align-items:center;justify-content:space-between;gap:18px;
+      position:sticky;top:0;backdrop-filter: blur(6px);
+      z-index:2000; box-shadow:0 2px 10px rgba(31,41,51,0.04);
+    }
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;color:#09303A;font-weight:700}
+    .brand h1{margin:0;font-size:16px}
+    nav ul{list-style:none;margin:0;padding:0;display:flex;gap:12px;align-items:center}
+    nav a{color:var(--text);text-decoration:none;padding:8px 12px;border-radius:8px;font-weight:600}
+    nav a:focus, nav a:hover{background:rgba(0,0,0,0.06)}
+
+    /* HERO */
+    .hero{
+      display:grid;grid-template-columns:1fr 460px;gap:28px;align-items:center;padding:48px 6%;
+    }
+    .hero-left{max-width:820px}
+    .kicker{font-size:13px;color:var(--muted);font-weight:600;margin-bottom:10px}
+    .hero h2{margin:0;font-size:46px;line-height:1.02;color:var(--text)}
+    .hero p{color:var(--muted);font-size:17px;margin-top:12px}
+    .cta{display:inline-block;margin-top:18px;padding:12px 18px;background:var(--accent);color:#022; border-radius:12px;font-weight:700;text-decoration:none}
+
+    .hero-right{position:relative}
+    .card-hero{background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.8));border-radius:18px;padding:14px;box-shadow:var(--shadow)}
+    .hero-image{width:100%;height:340px;border-radius:12px;object-fit:cover;display:block}
+
+    /* INTRO + CARDS */
+    .section{padding:28px 6%}
+    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin-top:18px}
+    .card{background:var(--card);border-radius:12px;padding:12px;box-shadow:var(--shadow)}
+    .card img{width:100%;height:140px;object-fit:cover;border-radius:8px}
+    .card h4{margin:10px 0 6px}
+    .card p{margin:0;color:var(--muted);font-size:14px}
+
+    /* MAP */
+    #map{height:68vh;border-radius:12px;overflow:hidden;margin:18px 6%;box-shadow:var(--shadow)}
+
+    /* FOOTER */
+    footer{padding:24px 6%;color:var(--muted);font-size:14px}
+
+    /* Responsive */
+    @media(max-width:920px){
+      .hero{grid-template-columns:1fr;gap:18px;padding:28px 4%}
+      .hero-image{height:260px}
+      nav ul{display:none}
+    }
+
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Saltar al contenido principal</a>
+
+  <header>
+    <div class="brand">
+      <div class="logo" aria-hidden="true">VL</div>
+      <div>
+        <h1 style="font-size:14px;margin:0">Descubriendo la memoria</h1>
+        <div style="font-size:12px;color:var(--muted)">Patrimonio invisible de Villa de Leyva</div>
+      </div>
+    </div>
+
+    <nav aria-label="Menú principal">
+      <ul>
+        <li><a href="#main">Inicio</a></li>
+        <li><a href="#sobre">Sobre el proyecto</a></li>
+        <li><a href="#patrimonio">Patrimonios</a></li>
+        <li><a href="#mapa">Mapa</a></li>
+        <li><a href="#contacto">Contacto</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-left">
+        <div class="kicker">Proyecto final Trabajo de Campo Universidad Nacional de Colombia</div>
+        <h2 id="hero-title">DESCUBRIENDO EL PATRIMONIO INVISIBLE DE VILLA DE LEYVA</h2>
+        <p style="font-size:17px;color:var(--muted)">Una herramienta abierta para reconocer, valorar y visibilizar la riqueza cultural no documentada.</p>
+        <a class="cta" href="#mapa">Abrir el mapa</a>
+
+        <div style="margin-top:20px;max-width:680px">
+          <p style="color:var(--muted);line-height:1.5">Este proyecto busca juntar la memoria de la comunidad, prácticas, oficios y lugares que no siempre aparecen en los inventarios oficiales. El mapa es interactivo y accesible: puedes activar la capa de patrimonios invisibles y la capa de patrimonios establecidos para comparar y entender tensiones territoriales.</p>
+        </div>
+      </div>
+
+      <aside class="hero-right">
+        <div class="card-hero" role="img" aria-label="Imagen representativa de Villa de Leyva">
+          <!-- Añade imagen de portada en la carpeta imagenes con el nombre hero.jpg -->
+          <img src="imagenes/hero.jpg" alt="Plaza y arquitectura colonial de Villa de Leyva" class="hero-image">
+        </div>
+      </aside>
+    </section>
+
+    <section id="sobre" class="section" aria-labelledby="sobre-title">
+      <h3 id="sobre-title">¿Qué es el patrimonio invisible?</h3>
+      <p style="max-width:900px;color:var(--muted);line-height:1.6">El patrimonio invisible está formado por prácticas, saberes, relatos y lugares valorados por las comunidades locales pero que muchas veces no aparecen en las listas oficiales. Reconocerlos ayuda a diseñar políticas culturales más inclusivas y a fortalecer la identidad local. En este mapa se contrastan los bienes oficiales con los patrimonios invisibles.</p>
+
+      <div class="cards" aria-hidden="false">
+        <article class="card">
+          <img src="imagenes/card1.jpg" alt="Imagen de tejido tradicional">
+          <h4>Oficios y saberes</h4>
+          <p>Tejidos, canciones y oficios que mantienen la memoria colectiva.</p>
+        </article>
+        <article class="card">
+          <img src="imagenes/card2.jpg" alt="Plaza comunitaria">
+          <h4>Espacios de sociabilidad</h4>
+          <p>Plazas, mercados y talleres que articulan la vida comunitaria.</p>
+        </article>
+        <article class="card">
+          <img src="imagenes/card3.jpg" alt="Niños aprendiendo oficios tradicionales">
+          <h4>Transmisión intergeneracional</h4>
+          <p>Actividades que conectan generaciones y preservan saberes.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="patrimonio" class="section" aria-labelledby="patrimonio-title">
+      <h3 id="patrimonio-title">Cómo usar el mapa</h3>
+      <ol style="color:var(--muted);line-height:1.6">
+        <li>Activa la capa <strong>Patrimonio Invisible</strong> para ver los lugares sugeridos por la comunidad.</li>
+        <li>Activa la capa <strong>Patrimonio Establecido</strong> para ver los bienes reconocidos oficialmente (PEMP).</li>
+        <li>Haz clic en cualquier marcador para ver fotos y descripciones.</li>
+      </ol>
+    </section>
+
+    <!-- MAPA -->
+    <section id="mapa" class="section" aria-labelledby="mapa-title">
+      <h3 id="mapa-title">Mapa interactivo</h3>
+      <div id="map" tabindex="0" aria-label="Mapa interactivo de patrimonios"></div>
+    </section>
+
+    <section id="contacto" class="section">
+      <h3>Contacto</h3>
+      <p style="color:var(--muted)">Proyecto elaborado por estudiantes de la Universidad Nacional. Para colaborar, comentar o solicitar acceso editable escriba a: <strong>mipaezg@unal.edu.co TEL: +57 3187871997</strong></p>
+    </section>
+  </main>
+
+  <footer>
+    <div>© Universidad Nacional de Colombia - Proyecto Patrimonios Invisibles • Diseñado para acceso público y educación comunitaria</div>
+  </footer>
+
+  <!-- SCRIPTS: Leaflet y mapa -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    /* Instrucciones para imágenes y iconos
+       - Crea una carpeta llamada "imagenes/" junto a este archivo.
+       - Coloca imágenes con estos nombres (puedes cambiarlos, pero actualiza el código):
+         hero.jpg, card1.jpg, card2.jpg, card3.jpg,
+         icono_invisible.png, icono_oficial.png,
+         domingo.jpg, abuelo.jpg, plaza_alternativa.jpg, alieth.jpg, cardo.jpg,
+         nariño.jpg, claustro.jpg, mesopotamia.jpg, acuna.jpg, carmen.jpg, observatorio.jpg,
+         plaza_mayor.jpg, paleo_unal.jpg, fosil.jpg, cip.jpg, parque_nariño.jpg, bioverso.jpg,
+         ricaurte.jpg, congreso.jpg, rosario.jpg
+       - Usa nombres simples, sin espacios ni tildes.
+    */
+
+    // Inicializar mapa
+    var map = L.map('map', {keyboard: true}).setView([5.6337, -73.5235], 14);
+
+    // Capa base (OpenStreetMap)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+      attribution: '&copy; OpenStreetMap contributors',
+      maxZoom:19
+    }).addTo(map);
+
+    // Iconos personalizados (fallbacks: si no existen, usa el default)
+    function makeIcon(url){
+      try{
+        return L.icon({iconUrl: url, iconSize:[34,34], iconAnchor:[17,34], popupAnchor:[0,-28]});
+      }catch(e){
+        return null;
+      }
+    }
+
+    var iconInvisible = L.icon({
+  iconUrl: 'imagenes/icono_invisible.png',
+  iconSize: [40, 40],
+  iconAnchor: [20, 40],
+  popupAnchor: [0, -32]
+});
+    var iconOficial = L.icon({
+  iconUrl: 'imagenes/icono_oficial.png',
+  iconSize: [40, 40],
+  iconAnchor: [20, 40],
+  popupAnchor: [0, -32]
+});
+
+    // Layers
+    var invisibleLayer = L.layerGroup();
+    var oficialLayer = L.layerGroup();
+
+    // Función auxiliar para agregar marcadores con popup accesible
+    function addMarker(layer, lat, lon, title, img, desc, icon){
+      var content = '<div style="max-width:320px">'
+        + '<h4 style="margin:6px 0;color:#08303A">'+title+'</h4>'
+        + (img? '<img src="imagenes/'+img+'" alt="Foto de '+title+'" style="width:100%;height:160px;object-fit:cover;border-radius:8px;margin-bottom:8px">':'')
+        + '<p style="margin:0;color:#4b5563">'+(desc||'Descripción disponible')+'</p>'
+        + '</div>';
+
+      var markerOptions = {};
+      if(icon) markerOptions.icon = icon;
+      var marker = L.marker([lat, lon], markerOptions).bindPopup(content,{maxWidth:360});
+      marker.addTo(layer);
+      return marker;
+    }
+
+    // === Patrimonio invisible (coordenadas proporcionadas) ===
+    addMarker(invisibleLayer,5.633371,-73.523257,'Casa de Domingo Pérez','domingo.jpg','Hijo de un pintor que amaba Villa de Leyva.', iconInvisible);
+    addMarker(invisibleLayer,5.629690,-73.521230,'Casa del Abuelo','abuelo.jpg','Memoria familiar y tradición local.', iconInvisible);
+    addMarker(invisibleLayer,5.629848,-73.520018,'Plaza de Mercado Alternativo','plaza_alternativa.jpg','Intercambio campesino contemporáneo.', iconInvisible);
+    addMarker(invisibleLayer,5.632707,-73.521772,'Taller de Lana - Alieth Ortiz','alieth.jpg','Oficio tradicional y memoria textil.', iconInvisible);
+    addMarker(invisibleLayer,5.713029,-73.493878,'Escuela Cardonal','cardo.jpg','Espacio educativo patrimonializado por la comunidad.', iconInvisible);
+
+    // === Patrimonio oficial (PEMP) ===
+    addMarker(oficialLayer,5.632135,-73.524827,'Museo Antonio Nariño','nariño.jpg','Museo con colección histórica.', iconOficial);
+    addMarker(oficialLayer,5.630902,-73.524155,'Claustro San Francisco','claustro.jpg','Bien inmueble protegido.', iconOficial);
+    addMarker(oficialLayer,5.636294,-73.518949,'Molino La Mesopotamia','mesopotamia.jpg','Molino histórico.', iconOficial);
+    addMarker(oficialLayer,5.634252,-73.523824,'Museo Luis Alberto Acuña','acuna.jpg','Casa-museo de artista local.', iconOficial);
+    addMarker(oficialLayer,5.634952,-73.523023,'Museo del Carmen','carmen.jpg','Museo con colecciones religiosas y populares.', iconOficial);
+    addMarker(oficialLayer,5.647089,-73.559368,'Observatorio Astronómico Muisca','observatorio.jpg','Observatorio y patrimonio científico.', iconOficial);
+    addMarker(oficialLayer,5.633727,-73.523606,'Plaza Mayor de Villa de Leyva','plaza_mayor.jpg','Plaza principal y centro histórico.', iconOficial);
+    addMarker(oficialLayer,5.643573,-73.516519,'Museo Paleontológico UNAL','paleo_unal.jpg','Museo paleontológico universitario.', iconOficial);
+    addMarker(oficialLayer,5.636941,-73.559095,'Museo Comunitario El Fósil','fosil.jpg','Museo comunitario local.', iconOficial);
+    addMarker(oficialLayer,5.636828,-73.560768,'Centro de Investigaciones Paleontológicas','cip.jpg','Centro de investigación.', iconOficial);
+    addMarker(oficialLayer,5.632275,-73.523489,'Parque Antonio Nariño','parque_nariño.jpg','Parque público.', iconOficial);
+    addMarker(oficialLayer,5.634517,-73.520387,'Museo Bioverso','bioverso.jpg','Museo de biodiversidad.', iconOficial);
+    addMarker(oficialLayer,5.634459,-73.520721,'Parque Antonio Ricaurte','ricaurte.jpg','Parque público.', iconOficial);
+    addMarker(oficialLayer,5.633721,-73.522840,'Casa del Primer Congreso','congreso.jpg','Casa histórica.', iconOficial);
+    addMarker(oficialLayer,5.633322,-73.523320,'Parroquia Nuestra Señora del Rosario','rosario.jpg','Iglesia principal.', iconOficial);
+
+    // CONTROL DE CAPAS REAL
+var overlays = {
+  "Patrimonio Invisible": invisibleLayer,
+  "Patrimonio Oficial": oficialLayer
+};
+L.control.layers(null, overlays, {collapsed:false}).addTo(map);
+// Accesibilidad: abrir primer popup al cargar capas
+    map.on('layeradd', function(e){ try{ if(e.layer===invisibleLayer) invisibleLayer.eachLayer(function(m){ /* noop */ }); }catch(err){} });
+
+    // Proporcionar controles de zoom y escala accesibles
+    L.control.scale({imperial:false}).addTo(map);
+
+    // NOTA: si no tienes los iconos en imagenes/, el mapa usará los iconos por defecto de Leaflet.
+
+  </script>
+</body>
+</html>
