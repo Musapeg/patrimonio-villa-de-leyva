@@ -164,6 +164,15 @@
     <!-- MAPA -->
     <section id="mapa" class="section" aria-labelledby="mapa-title">
       <h3 id="mapa-title">Mapa interactivo</h3>
+      <div style="margin-bottom:12px;">
+  <button onclick="toggleInvisible()" style="padding:8px 16px;border:none;border-radius:8px;background:#E8D4FF;color:#4a307e;font-weight:600;cursor:pointer;margin-right:8px;">
+    Mostrar/Ocultar Patrimonio Invisible
+  </button>
+
+  <button onclick="toggleOficial()" style="padding:8px 16px;border:none;border-radius:8px;background:#D6F5D6;color:#225522;font-weight:600;cursor:pointer;">
+    Mostrar/Ocultar Patrimonio Establecido
+  </button>
+</div>
       <div id="map" tabindex="0" aria-label="Mapa interactivo de patrimonios"></div>
     </section>
 
@@ -210,17 +219,19 @@
       }
     }
 
-    var iconInvisible = L.icon({
-  iconUrl: 'imagenes/icono_invisible.png',
-  iconSize: [40, 40],
-  iconAnchor: [20, 40],
-  popupAnchor: [0, -32]
+   // Íconos personalizados (invisible = morado, oficial = verde)
+var iconInvisible = L.icon({
+  iconUrl: 'imagenes/invisible.png',
+  iconSize: [36, 36],
+  iconAnchor: [18, 36],
+  popupAnchor: [0, -30]
 });
-    var iconOficial = L.icon({
-  iconUrl: 'imagenes/icono_oficial.png',
-  iconSize: [40, 40],
-  iconAnchor: [20, 40],
-  popupAnchor: [0, -32]
+
+var iconOficial = L.icon({
+  iconUrl: 'imagenes/estable.png',
+  iconSize: [36, 36],
+  iconAnchor: [18, 36],
+  popupAnchor: [0, -30]
 });
 
     // Layers
@@ -228,43 +239,95 @@
     var oficialLayer = L.layerGroup();
 
     // Función auxiliar para agregar marcadores con popup accesible
-    function addMarker(layer, lat, lon, title, img, desc, icon){
-      var content = '<div style="max-width:320px">'
-        + '<h4 style="margin:6px 0;color:#08303A">'+title+'</h4>'
-        + (img? '<img src="imagenes/'+img+'" alt="Foto de '+title+'" style="width:100%;height:160px;object-fit:cover;border-radius:8px;margin-bottom:8px">':'')
-        + '<p style="margin:0;color:#4b5563">'+(desc||'Descripción disponible')+'</p>'
-        + '</div>';
+   // === GALERÍA DE IMÁGENES EN POPUP ===
+function addMarkerGallery(layer, lat, lon, title, prefix, totalImages, desc, icon) {
+  // Crear galería como HTML
+  let gallery = `
+    <div style="max-width:330px">
+      <h4 style="margin:6px 0;color:#08303A">${title}</h4>
+      <div class="gallery-container" style="position:relative;">
+        <img id="${prefix}-img" 
+             src="imagenes/${prefix}1.jpg" 
+             style="width:100%;height:180px;object-fit:cover;border-radius:10px">
+        
+        <button onclick="prevImg('${prefix}', ${totalImages})"
+          style="position:absolute;left:4px;top:50%;transform:translateY(-50%);
+                 background:rgba(255,255,255,0.8);border:none;border-radius:50%;width:32px;height:32px;cursor:pointer;">‹</button>
 
-      var markerOptions = {};
-      if(icon) markerOptions.icon = icon;
-      var marker = L.marker([lat, lon], markerOptions).bindPopup(content,{maxWidth:360});
-      marker.addTo(layer);
-      return marker;
-    }
+        <button onclick="nextImg('${prefix}', ${totalImages})"
+          style="position:absolute;right:4px;top:50%;transform:translateY(-50%);
+                 background:rgba(255,255,255,0.8);border:none;border-radius:50%;width:32px;height:32px;cursor:pointer;">›</button>
+      </div>
+
+      <p style="margin:8px 0;color:#4b5563">${desc}</p>
+    </div>
+  `;
+
+  let markerOptions = {};
+  if (icon) markerOptions.icon = icon;
+
+  let marker = L.marker([lat, lon], markerOptions).bindPopup(gallery, {maxWidth: 360});
+  marker.addTo(layer);
+  return marker;
+}
+
+// Controladores para cambiar imágenes
+function nextImg(prefix, total) {
+  let img = document.getElementById(prefix + "-img");
+  let current = parseInt(img.src.match(/(\d+)\.jpg/)[1]);
+  let next = current === total ? 1 : current + 1;
+  img.src = `imagenes/${prefix}${next}.jpg`;
+}
+
+function prevImg(prefix, total) {
+  let img = document.getElementById(prefix + "-img");
+  let current = parseInt(img.src.match(/(\d+)\.jpg/)[1]);
+  let prev = current === 1 ? total : current - 1;
+  img.src = `imagenes/${prefix}${prev}.jpg`;
+}
+
 
     // === Patrimonio invisible (coordenadas proporcionadas) ===
-    addMarker(invisibleLayer,5.633371,-73.523257,'Casa de Domingo Pérez','domingo.jpg','Hijo de un pintor que amaba Villa de Leyva.', iconInvisible);
-    addMarker(invisibleLayer,5.629690,-73.521230,'Casa del Abuelo','abuelo.jpg','Memoria familiar y tradición local.', iconInvisible);
-    addMarker(invisibleLayer,5.629848,-73.520018,'Plaza de Mercado Alternativo','plaza_alternativa.jpg','Intercambio campesino contemporáneo.', iconInvisible);
-    addMarker(invisibleLayer,5.632707,-73.521772,'Taller de Lana - Alieth Ortiz','alieth.jpg','Oficio tradicional y memoria textil.', iconInvisible);
-    addMarker(invisibleLayer,5.713029,-73.493878,'Escuela Cardonal','cardo.jpg','Espacio educativo patrimonializado por la comunidad.', iconInvisible);
+   addMarkerGallery(invisibleLayer, 5.633371, -73.523257, 'Casa de Domingo Pérez', 'domingo', 3, 'Hijo de un pintor que amaba Villa de Leyva.', iconInvisible);
+addMarkerGallery(invisibleLayer, 5.629690, -73.521230, 'Casa del Abuelo', 'abuelo', 2, 'Memoria familiar y tradición local.', iconInvisible);
+addMarkerGallery(invisibleLayer, 5.629848, -73.520018, 'Plaza de Mercado Alternativo', 'alterna', 3, 'Intercambio campesino contemporáneo.', iconInvisible);
+addMarkerGallery(invisibleLayer, 5.632707, -73.521772, 'Taller de Lana – Alieth Ortiz', 'alieth', 2, 'Oficio tradicional y memoria textil.', iconInvisible);
+addMarkerGallery(invisibleLayer, 5.713029, -73.493878, 'Escuela Cardonal', 'cardo', 3, 'Espacio educativo patrimonializado por la comunidad.', iconInvisible);
+
 
     // === Patrimonio oficial (PEMP) ===
-    addMarker(oficialLayer,5.632135,-73.524827,'Museo Antonio Nariño','nariño.jpg','Museo con colección histórica.', iconOficial);
-    addMarker(oficialLayer,5.630902,-73.524155,'Claustro San Francisco','claustro.jpg','Bien inmueble protegido.', iconOficial);
-    addMarker(oficialLayer,5.636294,-73.518949,'Molino La Mesopotamia','mesopotamia.jpg','Molino histórico.', iconOficial);
-    addMarker(oficialLayer,5.634252,-73.523824,'Museo Luis Alberto Acuña','acuna.jpg','Casa-museo de artista local.', iconOficial);
-    addMarker(oficialLayer,5.634952,-73.523023,'Museo del Carmen','carmen.jpg','Museo con colecciones religiosas y populares.', iconOficial);
-    addMarker(oficialLayer,5.647089,-73.559368,'Observatorio Astronómico Muisca','observatorio.jpg','Observatorio y patrimonio científico.', iconOficial);
-    addMarker(oficialLayer,5.633727,-73.523606,'Plaza Mayor de Villa de Leyva','plaza_mayor.jpg','Plaza principal y centro histórico.', iconOficial);
-    addMarker(oficialLayer,5.643573,-73.516519,'Museo Paleontológico UNAL','paleo_unal.jpg','Museo paleontológico universitario.', iconOficial);
-    addMarker(oficialLayer,5.636941,-73.559095,'Museo Comunitario El Fósil','fosil.jpg','Museo comunitario local.', iconOficial);
-    addMarker(oficialLayer,5.636828,-73.560768,'Centro de Investigaciones Paleontológicas','cip.jpg','Centro de investigación.', iconOficial);
-    addMarker(oficialLayer,5.632275,-73.523489,'Parque Antonio Nariño','parque_nariño.jpg','Parque público.', iconOficial);
-    addMarker(oficialLayer,5.634517,-73.520387,'Museo Bioverso','bioverso.jpg','Museo de biodiversidad.', iconOficial);
-    addMarker(oficialLayer,5.634459,-73.520721,'Parque Antonio Ricaurte','ricaurte.jpg','Parque público.', iconOficial);
-    addMarker(oficialLayer,5.633721,-73.522840,'Casa del Primer Congreso','congreso.jpg','Casa histórica.', iconOficial);
-    addMarker(oficialLayer,5.633322,-73.523320,'Parroquia Nuestra Señora del Rosario','rosario.jpg','Iglesia principal.', iconOficial);
+  addMarkerGallery(oficialLayer, 5.632135, -73.524827, 'Museo Antonio Nariño', 'narino', 6, 'Museo con colección histórica.', iconOficial);
+
+addMarkerGallery(oficialLayer, 5.630902, -73.524155, 'Claustro San Francisco', 'claustro', 3, 'Bien inmueble protegido.', iconOficial);
+
+addMarkerGallery(oficialLayer, 5.636294, -73.518949, 'Molino La Mesopotamia', 'mesopotamia', 3, 'Molino histórico.', iconOficial);
+
+addMarkerGallery(oficialLayer, 5.634252, -73.523824, 'Museo Luis Alberto Acuña', 'acuna', 5, 'Casa-museo de artista local.', iconOficial);
+
+addMarkerGallery(oficialLayer, 5.634952, -73.523023, 'Museo del Carmen', 'carmen', 4, 'Museo con colecciones religiosas y populares.', iconOficial);
+
+addMarkerGallery(oficialLayer, 5.647089, -73.559368, 'Observatorio Astronómico Muisca', 'observa', 4, 'Observatorio y patrimonio científico.', iconOficial);
+
+addMarkerGallery(oficialLayer, 5.633727, -73.523606, 'Plaza Mayor de Villa de Leyva', 'plaza', 2, 'Plaza principal y centro histórico.', iconOficial);
+
+addMarkerGallery(oficialLayer, 5.643573, -73.516519, 'Museo Paleontológico UNAL', 'unal', 6, 'Museo paleontológico universitario.', iconOficial);
+
+addMarkerGallery(oficialLayer, 5.636941, -73.559095, 'Museo Comunitario El Fósil', 'fosil', 4, 'Museo comunitario local.', iconOficial);
+
+addMarkerGallery(oficialLayer, 5.636828, -73.560768, 'Centro de Investigaciones Paleontológicas', 'cip', 7, 'Centro de investigación.', iconOficial);
+
+addMarkerGallery(oficialLayer, 5.632275, -73.523489, 'Parque Antonio Nariño', 'parque_nariño', 1, 'Parque público.', iconOficial);
+
+addMarkerGallery(oficialLayer, 5.634517, -73.520387, 'Museo Bioverso', 'bioverso', 3, 'Museo de biodiversidad.', iconOficial);
+
+addMarkerGallery(oficialLayer, 5.634459, -73.520721, 'Parque Antonio Ricaurte', 'ricaurte', 1, 'Parque público.', iconOficial);
+
+addMarkerGallery(oficialLayer, 5.633721, -73.522840, 'Casa del Primer Congreso', 'congreso', 4, 'Casa histórica.', iconOficial);
+
+addMarkerGallery(oficialLayer, 5.633322, -73.523320, 'Parroquia Nuestra Señora del Rosario', 'rosario', 4, 'Iglesia principal.', iconOficial);
+
+addMarkerGallery(oficialLayer, 5.653000, -73.537000, 'Monasterio del Ecce Homo', 'ecce', 6, 'Sitio patrimonial religioso.', iconOficial);
+
 
     // CONTROL DE CAPAS REAL
 var overlays = {
